@@ -17,7 +17,9 @@ documentation = "https://entropiclabs.io/beacon/docs"
 name = "entropy"
 path = "src/main.rs"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "entropy"
+path = "src/lib.rs"
 
 [dependencies]
 base64 = "0.13.0"
