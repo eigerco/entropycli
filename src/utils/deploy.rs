@@ -128,7 +128,7 @@ pub async fn deploy_beacon(
         wasm_byte_code: wasm_bytes,
         instantiate_permission: Some(AccessConfig {
             permission: AccessType::OnlyAddress,
-            address: wallet.address.clone(),
+            addresses: vec![wallet.address.clone()],
         }),
     };
 

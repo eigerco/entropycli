@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
-use cosmrs::cosmwasm::MsgExecuteContract;
-use cosmrs::tx::Gas;
+use cosmrs::{cosmwasm::MsgExecuteContract, Gas};
 use cosmrs::AccountId;
 use cosmwasm_std::Uint128;
 use ecvrf_rs::{Proof, PublicKey, SecretKey};

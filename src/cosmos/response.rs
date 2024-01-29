@@ -103,8 +103,28 @@ impl TryFrom<TxResponse> for MsgStoreCodeResponse {
             })
             .transpose()?
             .ok_or_else(|| TxError::Parse("Unable to find code_id in logs".to_string()))?;
+        let code_checksum = tx
+            .logs
+            .iter()
+            .find(|log| {
+                log.events.iter().any(|event| {
+                    event.attributes.get("action")
+                        == Some(&"/cosmwasm.wasm.v1.MsgStoreCode".to_string())
+                })
+            })
+            .and_then(|log| {
+                log.events
+                    .iter()
+                    .find_map(|event| event.attributes.get("code_checksum").cloned())
+            })
+            .map(|code_checksum| {
+                cosmrs::tendermint::Hash::try_from(code_checksum.into_bytes())
+                    .map_err(|_| TxError::Parse("Unable to parse code_checksum".to_string()))
+            })
+            .transpose()?
+            .ok_or_else(|| TxError::Parse("Unable to find code_checksum in logs".to_string()))?;
 
-        Ok(MsgStoreCodeResponse { code_id })
+        Ok(MsgStoreCodeResponse { code_id, checksum: code_checksum })
     }
 }
 

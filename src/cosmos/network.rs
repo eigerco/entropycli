@@ -2,9 +2,7 @@ use std::str::FromStr;
 
 use bip32::DerivationPath;
 use cosmrs::{
-    tendermint::chain::Id as ChainId,
-    tx::{Fee, Gas},
-    Coin, Denom, ErrorReport,
+    tendermint::chain::Id as ChainId, tx::{Fee}, Coin, Denom, ErrorReport, Gas
 };
 use serde::{Deserialize, Serialize};
 
@@ -127,7 +125,7 @@ impl NetworkGasInfo {
         #[allow(clippy::cast_sign_loss)]
         // We can safely cast here because we know that the gas price won't be
         // mangled by these conversions.
-        let amount = u128::from(mul_gas_float(gas.clone(), self.gas_price).value());
+        let amount = u128::from(mul_gas_float(gas.clone(), self.gas_price));
 
         Ok(Fee::from_amount_and_gas(
             Coin {

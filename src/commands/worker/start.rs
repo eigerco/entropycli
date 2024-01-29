@@ -4,7 +4,7 @@
 use std::str::FromStr;
 
 use clap::Parser;
-use cosmrs::{tx::Gas, AccountId};
+use cosmrs::{Gas, AccountId};
 use ecvrf_rs::{decode_hex, Proof};
 use entropy_beacon_cosmos::beacon::BEACON_BASE_GAS;
 
@@ -178,7 +178,7 @@ pub async fn start_cmd(options: StartCommandOptions) {
         let total_callback_gas =
             BEACON_BASE_GAS + requests.iter().map(|r| r.callback_gas_limit).sum::<u64>();
 
-        let total_gas_cost = mul_gas_float(total_callback_gas, gas_info.gas_price).value();
+        let total_gas_cost = mul_gas_float(total_callback_gas, gas_info.gas_price);
 
         if !is_subsidized && total_payout < total_gas_cost.into() {
             eprintln!(

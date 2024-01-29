@@ -1,6 +1,10 @@
-use cosmrs::{tx::{
-    mode_info::Single, AuthInfo, Body, Fee, Gas, ModeInfo, Msg, SignDoc, SignMode, SignerInfo,
-}, AccountId};
+use cosmrs::{
+    Gas,
+    tx::{
+        mode_info::Single, AuthInfo, Body, Fee, ModeInfo, Msg, SignDoc, SignMode, SignerInfo,
+    },
+    AccountId,
+};
 
 use serde_json::json;
 
@@ -30,7 +34,12 @@ pub enum TxError {
 pub const HEIGHT_TIMEOUT_INTERVAL: u32 = 10;
 
 impl Wallet {
-    pub async fn broadcast_msg<M>(&self, msg: M, gas: Option<Gas>, granter: Option<AccountId>) -> Result<String, TxError>
+    pub async fn broadcast_msg<M>(
+        &self,
+        msg: M,
+        gas: Option<Gas>,
+        granter: Option<AccountId>,
+    ) -> Result<String, TxError>
     where
         M: Msg,
     {
@@ -123,16 +132,23 @@ impl Wallet {
         let (acc_num, seq) = self.account_number_and_sequence().await?;
 
         let body = Body::new(
-            vec![msg.to_any()?],
+            vec![msg
+                .to_any()
+                .map_err(|e| QueryError::ParseError(e.to_string()))?],
             String::new(),
             block_height + HEIGHT_TIMEOUT_INTERVAL,
         );
 
         let auth_info = self.single_unspecified_signer_auth(seq);
 
-        let sign_doc = SignDoc::new(&body, &auth_info, &self.network.chain_id, acc_num)?;
+        let sign_doc = SignDoc::new(&body, &auth_info, &self.network.chain_id, acc_num)
+            .map_err(|e| QueryError::ParseError(e.to_string()))?;
 
-        let tx_raw = sign_doc.sign(&self.signing_key())?.to_bytes()?;
+        let tx_raw = sign_doc
+            .sign(&self.signing_key())
+            .map_err(|e| QueryError::ParseError(e.to_string()))?
+            .to_bytes()
+            .map_err(|e| QueryError::ParseError(e.to_string()))?;
         let tx_raw = base64::encode(tx_raw);
 
         let res = self
@@ -146,7 +162,7 @@ impl Wallet {
             .await
             .map_err(QueryError::NetworkError)?;
 
-        let res = res.json::<serde_json::Value>().await?;
+        let res = res.json::<serde_json::Value>().await.map_err(|e| QueryError::ParseError(e.to_string()))?;
 
         let gas = res["gas_info"]["gas_used"]
             .as_str()

@@ -17,7 +17,7 @@ pub struct Wallet {
     pub privkey: bip32::XPrv,
     pub pubkey: cosmrs::crypto::PublicKey,
     pub address: AccountId,
-    pub (crate) network: Network,
+    pub(crate) network: Network,
 }
 
 impl Wallet {
@@ -29,7 +29,9 @@ impl Wallet {
         let privkey = bip32::XPrv::derive_from_path(&seed, &network.account_info.derivation_path)
             .map_err(|_| WalletError::Derivation)?;
 
-        let pubkey = SigningKey::from(&privkey).public_key();
+        let pubkey = SigningKey::from_slice(&privkey.to_bytes())
+            .map_err(|_| WalletError::InvalidMnemonic)?
+            .public_key();
 
         let address = pubkey
             .account_id(&network.account_info.chain_prefix)
@@ -44,10 +46,9 @@ impl Wallet {
     }
 
     pub fn signing_key(&self) -> SigningKey {
-        SigningKey::from(&self.privkey)
+        SigningKey::from_slice(&self.privkey.to_bytes()).unwrap()
     }
 }
-
 
 #[cfg(test)]
 mod tests {

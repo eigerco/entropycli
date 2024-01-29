@@ -1,5 +1,5 @@
 use clap::Parser;
-use cosmrs::tx::Gas;
+use cosmrs::Gas;
 use cosmwasm_std::Uint128;
 use dialoguer::Select;
 use ecvrf_rs::Proof;
